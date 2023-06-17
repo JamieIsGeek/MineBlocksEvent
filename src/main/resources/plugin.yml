@@ -1,0 +1,9 @@
+name: MineBlocksEvent
+version: '${version}'
+main: uk.jamieisgeek.mineblocksevent.MineBlocksEvent
+api-version: 1.19
+authors: [JamieIsGeek]
+description: Inspired by Aimseys event https://www.youtube.com/watch?v=8Nu4UFeEsYw
+commands:
+    event:
+      description: Event Command innit
