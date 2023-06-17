@@ -2,10 +2,10 @@ package uk.jamieisgeek.mineblocksevent;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import uk.jamieisgeek.sootlib.Misc.ScoreboardInterface;
 import uk.jamieisgeek.sootlib.Misc.TextManager;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class GameManager {
     private final MineBlocksEvent plugin;
@@ -14,7 +14,7 @@ public class GameManager {
     public boolean active = false;
     public GameManager(MineBlocksEvent plugin) {
         this.plugin = plugin;
-        this.scoreboardInterface = new ScoreboardInterface(6, "MineBlocks");
+        this.scoreboardInterface = new ScoreboardInterface(6, new TextManager().translateHex("&#4b6ba0MineBlocks"));
     }
 
     public void startGame() {
@@ -28,34 +28,33 @@ public class GameManager {
     }
 
     private void setupScoreboard() {
+        TextManager tm = new TextManager();
         Bukkit.getOnlinePlayers().forEach(player -> {
-            this.scoreboardInterface.setUniversalLine(5, "#DDAA33 █ 1st: &f" + this.getTopPlayer(1).getName());
-            this.scoreboardInterface.setUniversalLine(4, "#C0C0C0 █ 2nd: &f" + this.getTopPlayer(2).getName());
-            this.scoreboardInterface.setUniversalLine(3, "#CD7F32 █ 3rd: &f" + this.getTopPlayer(3).getName());
-            this.scoreboardInterface.setLine(player, 1, "#4b6ba0 █ Blocks Mined: &f" + this.playerScore.get(player));
+            this.scoreboardInterface.setUniversalLine(1, tm.translateHex("&#DDAA33█ 1st: &f" + this.getTopPlayer(1)));
+            this.scoreboardInterface.setUniversalLine(2, tm.translateHex("&#C0C0C0█ 2nd: &f" + this.getTopPlayer(2)));
+            this.scoreboardInterface.setUniversalLine(3, tm.translateHex("&#CD7F32█ 3rd: &f" + this.getTopPlayer(3)));
+            this.scoreboardInterface.setLine(player, 5, tm.translateHex("&#4b6ba0█ Blocks Mined: &f" + this.playerScore.get(player)));
 
             this.scoreboardInterface.displayForPlayer(player);
         });
     }
 
-    private Player getTopPlayer(int position) {
-        List<Map.Entry<Player, Integer>> list = new ArrayList<>(playerScore.entrySet());
-
-        // Sort the list in descending order based on integer values
-        list.sort((a, b) -> b.getValue().compareTo(a.getValue()));
-
-        // Check if the position is within the valid range
-        if (position < 1) {
-            throw new IllegalArgumentException("Invalid position");
+    private String getTopPlayer(int position) {
+        if(position > playerScore.size()) {
+            return "N/A";
         }
 
-        if(position > list.size()) {
-            return null;
+        List<Player> sortedPlayers = playerScore.entrySet()
+                .stream()
+                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                .map(Map.Entry::getKey)
+                .toList();
+
+        if(sortedPlayers.get(position - 1) == null) {
+            return "N/A";
         }
 
-        // Retrieve the Player object at the specified position
-        Map.Entry<Player, Integer> entry = list.get(position - 1);
-        return entry.getKey();
+        return sortedPlayers.get(position - 1).getName();
     }
 
     private int getPlayerPosition(Player player) {
@@ -82,11 +81,11 @@ public class GameManager {
 
     public void endGame() {
         Bukkit.getOnlinePlayers().forEach(player -> {
-            player.sendMessage(new TextManager().translateHex("&#ee6680 The game has ended!"));
+            player.sendMessage(new TextManager().translateHex("&#ee6680The game has ended!"));
 
-            player.sendMessage(new TextManager().translateHex("&#ee6680 1st: &f" + this.getTopPlayer(1).getName()));
-            player.sendMessage(new TextManager().translateHex("&#ee6680 2nd: &f" + this.getTopPlayer(2).getName()));
-            player.sendMessage(new TextManager().translateHex("&#ee6680 3rd: &f" + this.getTopPlayer(3).getName()));
+            player.sendMessage(new TextManager().translateHex("&#ee66801st: &f" + this.getTopPlayer(1)));
+            player.sendMessage(new TextManager().translateHex("&#ee66802nd: &f" + this.getTopPlayer(2)));
+            player.sendMessage(new TextManager().translateHex("&#ee66803rd: &f" + this.getTopPlayer(3)));
 
             String position;
             position = String.valueOf(this.getPlayerPosition(player));
@@ -100,7 +99,7 @@ public class GameManager {
                 position += "th";
             }
 
-            player.sendMessage(new TextManager().translateHex("&#ee6680 You placed &f" + position));
+            player.sendMessage(new TextManager().translateHex("&#ee6680You placed &f" + position));
             this.scoreboardInterface.removePlayerFromScoreboard(player);
         });
 

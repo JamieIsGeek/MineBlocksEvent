@@ -1,6 +1,7 @@
 package uk.jamieisgeek.mineblocksevent;
 
 import org.bukkit.plugin.java.JavaPlugin;
+import uk.jamieisgeek.mineblocksevent.Commands.AdminCommand;
 import uk.jamieisgeek.sootlib.Registers.CommandRegisterer;
 
 import java.lang.reflect.InvocationTargetException;
@@ -11,13 +12,8 @@ public final class MineBlocksEvent extends JavaPlugin {
     @Override
     public void onEnable() {
         gameManager = new GameManager(this);
-        try {
-            new CommandRegisterer("Commands").registerCommands();
-        } catch (NoSuchMethodException | InvocationTargetException | InstantiationException |
-                 IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
 
+        this.getCommand("event").setExecutor(new AdminCommand());
         this.getServer().getPluginManager().registerEvents(new EventListener(), this);
 
         getLogger().info("MineBlocksEvent has been enabled!");
